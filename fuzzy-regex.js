@@ -108,15 +108,3 @@ class FuzzyRegExp {
 		return string;
 	}
 }
-
-
-
-//console.log(new FuzzyRegExp('\\a(bc)efg[12]ij', 80))
-
-//console.log(new FuzzyRegExp('ab(c)', 30))
-
-//console.log('abd'.match(new FuzzyRegExp('ab(c)', 30)))
-
-//console.log((new FuzzyRegExp('^ab(c)(d)$', 60, 'i')).match('abe'))
-
-console.log((new FuzzyRegExp('ab(c)', 33, 'i')).match('ade'))
