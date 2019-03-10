@@ -57,11 +57,11 @@ class FuzzyRegExp {
             tree.push(tokens);
 
             const length = Math.round(changePoints.length * fuzzines / 100);
-            for (let i = 0; i < length; i++) {
-                tree.map(array => tree.push(...this.fuzzyfy(array)));
+            for (let i = 1; i < length; i++) {
+                tree.slice(i - 1).map(array => tree.push(...this.fuzzyfy(array)));
             }
 
-            this.tree = tree.map(node => `(?:${node.join('')})`);
+            this.tree = tree.map(node => `(?:${node.join('')})`).filter((node, i, tree) => tree.indexOf(node) == i);
         }
     }
 
