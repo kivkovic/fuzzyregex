@@ -1,6 +1,6 @@
 class FuzzyRegExp {
 
-	constructor(pattern, percent = 100, flags = '') {
+	constructor(pattern, fuzzines = 100, flags = '') {
 		new RegExp(pattern, flags); // validation
 
 		let escaped = false, 
@@ -62,10 +62,10 @@ class FuzzyRegExp {
 		this.flags = flags;
 		this.tree = [pattern];
 
-		if (changePoints.length && percent < 100) {
+		if (changePoints.length && fuzzines < 100) {
 			tree.push(tokens);
 
-			const length = Math.round(changePoints.length * percent / 100);
+			const length = Math.round(changePoints.length * fuzzines / 100);
 			for (let i = 0; i < length; i++) {
 				tree.map(array => tree.push(...this.fuzzyfy(array)));
 			}
