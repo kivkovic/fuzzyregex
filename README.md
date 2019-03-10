@@ -6,7 +6,7 @@ Does fuzzy matching/replacement in javascript regex, e.g.:
 new FuzzyRegExp('ab(c)', 33);
 ```
 
-creates a regex pattern that matches ```/ab(c)/``` with a fuzzines of 33%
+creates a regex pattern ```/ab(c)/``` with a fuzzines of 33%, meaning it will match any string matched by ```/ab(c)/```, ```/.?b(c)/```, ```/a.?(c)/``` or ```/ab(.?)/```.
 
 ```node
 new FuzzyRegExp('ab(c)', 33).match('abe'); 
