@@ -1,110 +1,110 @@
 class FuzzyRegExp {
 
-	constructor(pattern, fuzzines = 100, flags = '') {
-		new RegExp(pattern, flags); // validation
+    constructor(pattern, fuzzines = 100, flags = '') {
+        new RegExp(pattern, flags); // validation
 
-		let escaped = false, 
-			noncapture = false, 
-			square = false,
-			curly = false,
-			group = { level: 0, start: 0, end: pattern.length };
+        let escaped = false,
+            noncapture = false,
+            square = false,
+            curly = false,
+            group = { level: 0, start: 0, end: pattern.length };
 
-		const tokens = [], changePoints = [], tree = [];
+        const tokens = [], changePoints = [], tree = [];
 
-		for (let i = 0; i < pattern.length; i++) {
-			if (escaped = !escaped && pattern[i - 1] == '\\') {
-				if (tokens.length) {
-					tokens[tokens.length - 1] += pattern[i];
-				} else {
-					tokens.push(pattern[i]);
-				}
-			} else {
-				if (pattern[i] == '(') {
-					noncapture = pattern[i + 1] == '?';
-					group.level++;
-					group.start = i + 1;
-				
-				} else if (pattern[i] == ')') {
-					if (!noncapture) {
-						group.end = i - 1;
-					}
-				
-				} else if (pattern[i] == '[') {
-					square = true;
-					tokens.push('');
+        for (let i = 0; i < pattern.length; i++) {
+            if (escaped = !escaped && pattern[i - 1] == '\\') {
+                if (tokens.length) {
+                    tokens[tokens.length - 1] += pattern[i];
+                } else {
+                    tokens.push(pattern[i]);
+                }
+            } else {
+                if (pattern[i] == '(') {
+                    noncapture = pattern[i + 1] == '?';
+                    group.level++;
+                    group.start = i + 1;
 
-				} else if (pattern[i] == ']') {
-					square = false;
+                } else if (pattern[i] == ')') {
+                    if (!noncapture) {
+                        group.end = i - 1;
+                    }
 
-				} else if (!square && pattern[i] == '{') {
-					curly = true;
-					tokens.push('');
+                } else if (pattern[i] == '[') {
+                    square = true;
+                    tokens.push('');
 
-				} else if (!square && pattern[i] == '}') {
-					curly = false;
+                } else if (pattern[i] == ']') {
+                    square = false;
 
-				} else if (!noncapture && !curly && !square) {
-					changePoints.push(tokens.length);
-				}
+                } else if (!square && pattern[i] == '{') {
+                    curly = true;
+                    tokens.push('');
 
-				if (square || curly || pattern[i] == ']' || pattern[i] == '}') {
-					if (tokens.length) {
-						tokens[tokens.length - 1] += pattern[i];
-					} else {
-						tokens.push(pattern[i]);
-					}	
-				} else {
-					tokens.push(pattern[i]);
-				}
-			}
-		}
+                } else if (!square && pattern[i] == '}') {
+                    curly = false;
 
-		this.flags = flags;
-		this.tree = [pattern];
+                } else if (!noncapture && !curly && !square) {
+                    changePoints.push(tokens.length);
+                }
 
-		if (changePoints.length && fuzzines < 100) {
-			tree.push(tokens);
+                if (square || curly || pattern[i] == ']' || pattern[i] == '}') {
+                    if (tokens.length) {
+                        tokens[tokens.length - 1] += pattern[i];
+                    } else {
+                        tokens.push(pattern[i]);
+                    }
+                } else {
+                    tokens.push(pattern[i]);
+                }
+            }
+        }
 
-			const length = Math.round(changePoints.length * fuzzines / 100);
-			for (let i = 0; i < length; i++) {
-				tree.map(array => tree.push(...this.fuzzyfy(array)));
-			}
+        this.flags = flags;
+        this.tree = [pattern];
 
-			this.tree = tree.map(node => `(?:${node.join('')})`);
-		}
-	}
+        if (changePoints.length && fuzzines < 100) {
+            tree.push(tokens);
 
-	fuzzyfy(array) {
-		const arrays = [];
-		for (let i = 0; i < array.length; i++) {
-			if (array[i].match(/^([\.\?\*\+\(\)\{\}\[\]]|\{.+\})$/)) continue;
-			const copy = [...array];
-			copy[i] = '.?';
-			arrays.push(copy);
-		}
-		return arrays;
-	}
+            const length = Math.round(changePoints.length * fuzzines / 100);
+            for (let i = 0; i < length; i++) {
+                tree.map(array => tree.push(...this.fuzzyfy(array)));
+            }
 
-	unwrap() {
-		return new RegExp(`(?:${this.tree}`);
-	}
+            this.tree = tree.map(node => `(?:${node.join('')})`);
+        }
+    }
 
-	match(string) {
-		for (let branch of this.tree) {
-			let match = string.match(new RegExp(branch, this.flags));
-			if (match) return match;
-		}
+    fuzzyfy(array) {
+        const arrays = [];
+        for (let i = 0; i < array.length; i++) {
+            if (array[i].match(/^([\.\?\*\+\(\)\{\}\[\]]|\{.+\})$/)) continue;
+            const copy = [...array];
+            copy[i] = '.?';
+            arrays.push(copy);
+        }
+        return arrays;
+    }
 
-		return null;
-	}
+    unwrap() {
+        return new RegExp(`(?:${this.tree}`);
+    }
 
-	replace(string, replacement) {
-		for (let branch of this.tree) {
-			let match = string.match(new RegExp(branch, this.flags));
-			if (match) {
-				return string.replace(branch, replacement);
-			}
-		}
-		return string;
-	}
+    match(string) {
+        for (let branch of this.tree) {
+            let match = string.match(new RegExp(branch, this.flags));
+            if (match) return match;
+        }
+
+        return null;
+    }
+
+    replace(string, replacement) {
+        for (let branch of this.tree) {
+            let match = string.match(new RegExp(branch, this.flags));
+            if (match) {
+                return string.replace(branch, replacement);
+            }
+        }
+        return string;
+    }
 }
