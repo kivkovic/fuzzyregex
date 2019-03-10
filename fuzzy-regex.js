@@ -6,8 +6,7 @@ class FuzzyRegExp {
         let escaped = false,
             noncapture = false,
             square = false,
-            curly = false,
-            group = { level: 0, start: 0, end: pattern.length };
+            curly = false;
 
         const tokens = [], changePoints = [], tree = [];
 
@@ -21,13 +20,6 @@ class FuzzyRegExp {
             } else {
                 if (pattern[i] == '(') {
                     noncapture = pattern[i + 1] == '?';
-                    group.level++;
-                    group.start = i + 1;
-
-                } else if (pattern[i] == ')') {
-                    if (!noncapture) {
-                        group.end = i - 1;
-                    }
 
                 } else if (pattern[i] == '[') {
                     square = true;
@@ -36,23 +28,22 @@ class FuzzyRegExp {
                 } else if (pattern[i] == ']') {
                     square = false;
 
-                } else if (!square && pattern[i] == '{') {
-                    curly = true;
-                    tokens.push('');
+                } else if (!square) {
 
-                } else if (!square && pattern[i] == '}') {
-                    curly = false;
+	                if (pattern[i] == '{') {
+	                    curly = true;
+	                    tokens.push('');
 
-                } else if (!noncapture && !curly && !square) {
-                    changePoints.push(tokens.length);
+	                } else if (pattern[i] == '}') {
+	                    curly = false;
+
+	                } else if (!noncapture && !curly) {
+	                    changePoints.push(tokens.length);
+	                }
                 }
 
                 if (square || curly || pattern[i] == ']' || pattern[i] == '}') {
-                    if (tokens.length) {
-                        tokens[tokens.length - 1] += pattern[i];
-                    } else {
-                        tokens.push(pattern[i]);
-                    }
+                    tokens[tokens.length - 1] += pattern[i];
                 } else {
                     tokens.push(pattern[i]);
                 }
