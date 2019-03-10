@@ -65,7 +65,7 @@ class FuzzyRegExp {
 		if (changePoints.length && percent < 100) {
 			tree.push(tokens);
 
-			const length = Math.round(changePoints.length * (100 - percent) / 100);
+			const length = Math.round(changePoints.length * percent / 100);
 			for (let i = 0; i < length; i++) {
 				tree.map(array => tree.push(...this.fuzzyfy(array)));
 			}
